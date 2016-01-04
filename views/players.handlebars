@@ -1,0 +1,15 @@
+
+<section>
+  <h1>{{title}}</h1>
+  <ul class="dog-list">
+    {{#if players}}
+    {{#each players}}
+    <li>
+      Number: {{number}} - Name: {{name}} - Position: {{position}}
+    </li>
+    {{/each}}
+    {{/if}}
+  </ul>
+  <br>
+  <a href="/">Home</a>
+</section>
