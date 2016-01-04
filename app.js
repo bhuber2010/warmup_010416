@@ -8,6 +8,8 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var exphbs  = require('express-handlebars');
 
+var dotenv = require('dotenv').load();
+
 var routes = require('./routes/index');
 var players = require('./routes/players');
 
