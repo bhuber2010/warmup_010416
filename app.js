@@ -10,7 +10,8 @@ var exphbs  = require('express-handlebars');
 
 var dotenv = require('dotenv').load();
 var pg = require('pg');
-var sessions = require('client-sessions');
+var session = require('express-session');
+var pgSession = require('connect-pg-simple')(session);
 
 var routes = require('./routes/index');
 var passport = require('./modules/passport_config')
@@ -40,23 +41,17 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // sessions
-app.use(sessions({
-  cookieName: 'mySession', // cookie name dictates the key name added to the request object
-  secret: process.env.SESSION_SECRET, // should be a large unguessable string
-  duration: 24 * 60 * 60 * 1000, // how long the session will stay valid in ms
-  activeDuration: 1000 * 60 * 5, // if expiresIn < activeDuration, the session will be extended by activeDuration milliseconds
-  cookie: {path: '/players'}
+app.use(session({
+  store: new pgSession({
+    pg : pg,                                     // Use global pg-module
+    conString : process.env.DATABASE_URL,        // Connect using something else than default DATABASE_URL env variable
+    tableName : 'session'                        // Use another table-name than the default "session" one
+  }),
+  saveUninitialized: true,
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 } // 30 days
 }));
-
-app.use(function(req, res, next) {
-  if (req.mySession.seenyou) {
-    res.setHeader('X-Seen-You', 'true');
-  } else {
-    // setting a property will automatically cause a Set-Cookie response to be sent
-    req.mySession.seenyou = true;
-    res.setHeader('X-Seen-You', 'false');
-  }
-});
 
 // passport user session init
 app.use(passport.initialize());
@@ -72,7 +67,7 @@ function ensureAuthenticated(req, res, next) {
 // mount routes
 app.use('/', routes);
 app.use('/auth', auth);
-app.use('/players', ensureAuthenticated, players);
+app.use('/players', players);
 
 /// catch 404 and forward to error handler
 app.use(function(req, res, next) {

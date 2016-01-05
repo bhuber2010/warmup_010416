@@ -13,7 +13,7 @@ router.get('/google/callback',
   passport.authenticate('google', { failureRedirect: '/' }),
   function(req, res) {
     // insertUser(req.user);
-    res.redirect('/account');
+    res.redirect('/players');
   });
 
 //local
@@ -26,7 +26,7 @@ router.post('/login',
   function(req, res) {
     // pull user off of req object
 
-    res.redirect('/account');
+    res.redirect('/players');
   });
 
 // app logout
